@@ -18,7 +18,7 @@ export default async function Home() {
             alt="Composer"
             className="h-20 w-20"
           />
-          <p className="overflow-visible bg-gradient-to-r from-blue-500 via-cyan-500 to-indigo-500 bg-clip-text text-5xl font-black text-transparent">
+          <p className="mb-1 overflow-visible bg-gradient-to-r from-blue-500 via-cyan-500 to-indigo-500 bg-clip-text text-5xl font-black text-transparent">
             Composer
           </p>
         </div>

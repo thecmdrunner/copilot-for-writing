@@ -17,41 +17,67 @@ export function AutoCompleteEditor() {
 
   const { mutateAsync: fetchCompletion } = useMutation({
     mutationFn: async (text: string) => {
+      console.log("API REQUEST STARTED", { text, context, isComposing });
+
       if (!text.trim() || isComposing) {
+        console.log("SKIPPING API REQUEST - empty text or composing");
         setAiSuggestion("");
         return null;
       }
 
-      const response = await fetch("/api/completion", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          prompt: text,
-          context: context.trim(), // Include the context in the API request
-        }),
-      });
+      try {
+        console.log("SENDING API REQUEST", { text, context });
+        const response = await fetch("/api/completion", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            prompt: text,
+            context: context.trim(), // Include the context in the API request
+          }),
+        });
 
-      if (!response.ok) throw new Error("Failed to fetch completion");
+        console.log("API RESPONSE RECEIVED", {
+          status: response.status,
+          ok: response.ok,
+        });
 
-      const data = (await response.json()) as CompletionResponse;
-      return data;
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("API ERROR", {
+            status: response.status,
+            error: errorText,
+          });
+          throw new Error(`Failed to fetch completion: ${errorText}`);
+        }
+
+        const data = (await response.json()) as CompletionResponse;
+        console.log("API RESPONSE DATA", data);
+        return data;
+      } catch (error) {
+        console.error("API REQUEST ERROR", error);
+        throw error;
+      }
     },
   });
 
   // Add a more robust function to detect if we're at a position where suggestions are appropriate
   const shouldShowSuggestion = useCallback(
     (text: string, cursorPosition: number): boolean => {
+      // Special case: empty input with context should allow suggestions
+      if ((text.trim() === "" || text.trim() === " ") && context.trim()) {
+        return true;
+      }
+
       if (cursorPosition !== text.length) return false;
 
-      // Don't show suggestions for empty text
-      if (text.trim().length === 0) return false;
+      // Don't show suggestions for empty text without context
+      if (text.trim().length === 0 && !context.trim()) return false;
 
       // Check if we're at the end of the last line
       const lines = text.split("\n");
       if (lines.length === 0) return false;
 
-      const lastLine = lines[lines.length - 1];
-      if (!lastLine) return false;
+      const lastLine = lines[lines.length - 1] ?? "";
       const lastLineLength = lastLine.length;
 
       // Calculate position in the last line
@@ -64,7 +90,7 @@ export function AutoCompleteEditor() {
       const words = lastLine.trim().split(/\s+/);
       if (words.length === 0) return true;
 
-      const lastWord = words[words.length - 1];
+      const lastWord = words[words.length - 1] ?? "";
 
       // If the last character is a space, we're at a word boundary
       if (lastLine.endsWith(" ")) return true;
@@ -75,7 +101,7 @@ export function AutoCompleteEditor() {
       const punctuation = [".", ",", "!", "?", ":", ";"];
       const lastChar = lastLine.charAt(lastLine.length - 1);
 
-      if (lastWord && lastWord.length > 3 && !punctuation.includes(lastChar)) {
+      if (lastWord.length > 3 && !punctuation.includes(lastChar)) {
         // Check if the last word looks like a name (starts with uppercase)
         if (/^[A-Z][a-z]+$/.test(lastWord)) {
           return false; // Don't suggest after what looks like a complete name
@@ -84,24 +110,54 @@ export function AutoCompleteEditor() {
 
       return true;
     },
-    [],
+    [context],
   );
 
   // Update the debounced fetch completion to use the new function
   const debouncedFetchCompletion = useDebounceCallback(async (text: string) => {
+    console.log("DEBOUNCED FETCH STARTED", { text, context });
+
     try {
+      // For empty input with context, we should always show a suggestion
+      const isEmptyWithContext =
+        (text.trim() === "" || text.trim() === " ") && context.trim();
+      console.log("CHECKING CONDITIONS", {
+        isEmptyWithContext,
+        hasInputRef: !!inputRef.current,
+        cursorPosition: inputRef.current?.selectionStart,
+      });
+
       // Check if we should show a suggestion at the current position
-      if (
-        !inputRef.current ||
-        !shouldShowSuggestion(text, inputRef.current.selectionStart)
-      ) {
+      if (!inputRef.current) {
+        console.log("NO INPUT REF - ABORTING");
         setAiSuggestion("");
         return;
       }
 
+      // If it's not an empty input with context, check if we should show a suggestion
+      if (
+        !isEmptyWithContext &&
+        !shouldShowSuggestion(text, inputRef.current.selectionStart)
+      ) {
+        console.log("SHOULD NOT SHOW SUGGESTION - ABORTING");
+        setAiSuggestion("");
+        return;
+      }
+
+      console.log("FETCHING COMPLETION");
       const result = await fetchCompletion(text);
+      console.log("COMPLETION RESULT", result);
+
       if (result?.text) {
-        // Check if we need to add a space before the suggestion
+        // Special handling for empty input with context - don't add a space
+        // since we're starting from scratch
+        if (!text.trim() || text.trim() === " ") {
+          console.log("SETTING SUGGESTION FOR EMPTY INPUT", result.text);
+          setAiSuggestion(result.text);
+          return;
+        }
+
+        // Normal case - check if we need to add a space before the suggestion
         let suggestionText = result.text;
 
         // If the input doesn't end with a space and the suggestion doesn't start with a space,
@@ -132,8 +188,10 @@ export function AutoCompleteEditor() {
           suggestionText = " " + suggestionText;
         }
 
+        console.log("SETTING SUGGESTION", suggestionText);
         setAiSuggestion(suggestionText);
       } else {
+        console.log("NO SUGGESTION TEXT - CLEARING");
         setAiSuggestion("");
       }
     } catch (error) {
@@ -305,6 +363,56 @@ export function AutoCompleteEditor() {
     [],
   );
 
+  // Add a handler for input focus with direct API call
+  const handleInputFocus = useCallback(() => {
+    console.log("FOCUS EVENT TRIGGERED", {
+      inputEmpty: !input.trim(),
+      contextProvided: !!context.trim(),
+      isComposing,
+      hasSuggestion: !!aiSuggestion,
+    });
+
+    // Only fetch a suggestion if:
+    // 1. The input is empty
+    // 2. There's context provided
+    // 3. We're not already composing
+    // 4. We don't already have a suggestion
+    if (!input.trim() && context.trim() && !isComposing && !aiSuggestion) {
+      console.log("ATTEMPTING TO FETCH INITIAL SUGGESTION - DIRECT API CALL");
+
+      // Make a direct API call instead of using the mutation
+      fetch("/api/completion", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prompt: " ",
+          context: context.trim(),
+        }),
+      })
+        .then((response) => {
+          console.log("DIRECT API RESPONSE", {
+            status: response.status,
+            ok: response.ok,
+          });
+          if (!response.ok) {
+            return response.text().then((text) => {
+              throw new Error(`API error: ${text}`);
+            });
+          }
+          return response.json();
+        })
+        .then((data) => {
+          console.log("DIRECT API SUCCESS", data);
+          if (data.text) {
+            setAiSuggestion(data.text);
+          }
+        })
+        .catch((error) => {
+          console.error("DIRECT API ERROR", error);
+        });
+    }
+  }, [input, context, isComposing, aiSuggestion]);
+
   return (
     <div className="relative mx-auto w-full max-w-2xl">
       {/* Context input */}
@@ -337,11 +445,16 @@ export function AutoCompleteEditor() {
           {/* Input textarea with suggestion overlay */}
           <textarea
             ref={inputRef}
-            value={input}
+            value={
+              context.trim().length > 0 && aiSuggestion && input.length === 0
+                ? " "
+                : input
+            }
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
             onCompositionStart={handleCompositionStart}
             onCompositionEnd={handleCompositionEnd}
+            onFocus={handleInputFocus}
             placeholder="Start typing..."
             className={cn(
               "w-full resize-none rounded-lg border-0 bg-transparent p-4 focus:ring-0",
