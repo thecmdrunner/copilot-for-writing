@@ -239,13 +239,12 @@ export function AutoCompleteEditor() {
               context: context.trim(),
             }),
           })
-            .then((response) => {
+            .then(async (response) => {
               if (!response.ok) {
-                return response.text().then((text) => {
-                  throw new Error(`API error: ${text}`);
-                });
+                const text = await response.text();
+                throw new Error(`API error: ${text}`);
               }
-              return response.json();
+              return response.json() as Promise<CompletionResponse>;
             })
             .then((data) => {
               console.log("NEW LINE SUGGESTION RESULT", data);
@@ -438,17 +437,16 @@ export function AutoCompleteEditor() {
           context: context.trim(),
         }),
       })
-        .then((response) => {
+        .then(async (response) => {
           console.log("DIRECT API RESPONSE", {
             status: response.status,
             ok: response.ok,
           });
           if (!response.ok) {
-            return response.text().then((text) => {
-              throw new Error(`API error: ${text}`);
-            });
+            const text = await response.text();
+            throw new Error(`API error: ${text}`);
           }
-          return response.json();
+          return response.json() as Promise<CompletionResponse>;
         })
         .then((data) => {
           console.log("DIRECT API SUCCESS", data);
@@ -511,11 +509,11 @@ export function AutoCompleteEditor() {
       </div>
 
       {/* Context input */}
-      <div className="mb-4 w-4/12">
+      <div className="h-full w-4/12">
         <p className="text-muted-foreground mb-4 flex items-center gap-2">
           <LucideBookOpenText className="h-4 w-4" /> Context
         </p>
-        <div className="relative bg-neutral-100">
+        <div className="relative h-full border border-neutral-100">
           <textarea
             ref={contextRef}
             id="context"

@@ -18,17 +18,14 @@ export async function POST(req: Request) {
   console.log("API ENDPOINT CALLED");
 
   try {
-    const body = await req.json();
-    console.log("REQUEST BODY", body);
+    const parseResult = requestSchema.safeParse(await req.json());
 
-    const result = requestSchema.safeParse(body);
-
-    if (!result.success) {
-      console.error("VALIDATION ERROR", result.error);
+    if (!parseResult.success) {
+      console.error("VALIDATION ERROR", parseResult.error);
       return Response.json({ error: "Invalid request" }, { status: 400 });
     }
 
-    const { prompt, context } = result.data;
+    const { prompt, context } = parseResult.data;
     console.log("PARSED REQUEST", { prompt, context });
 
     const now = new Date();
