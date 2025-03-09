@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { useMutation } from "@tanstack/react-query";
 import { LucideBookOpenText, LucideTextCursor } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Pointer } from "./magicui/pointer";
 
 export function AutoCompleteEditor() {
   const [input, setInput] = useState("");
@@ -18,8 +19,6 @@ export function AutoCompleteEditor() {
 
   const { mutateAsync: fetchCompletion } = useMutation({
     mutationFn: async (text: string) => {
-      console.log("API REQUEST STARTED", { text, context, isComposing });
-
       if (!text.trim() || isComposing) {
         console.log("SKIPPING API REQUEST - empty text or composing");
         setAiSuggestion("");
@@ -469,7 +468,10 @@ export function AutoCompleteEditor() {
           you complete your thoughts.
         </p>
 
-        <div className="relative h-full bg-neutral-100">
+        <div className="relative h-full overflow-y-scroll bg-neutral-100">
+          <Pointer>
+            <div className="-mt-7 text-2xl">🪶</div>
+          </Pointer>
           {/* Input textarea with suggestion overlay */}
           <textarea
             ref={inputRef}
@@ -485,7 +487,7 @@ export function AutoCompleteEditor() {
             onFocus={handleInputFocus}
             placeholder="Start typing..."
             className={cn(
-              "h-full min-h-full w-full grow resize-none rounded-lg border-0 bg-transparent p-4 focus:ring-0",
+              "h-full min-h-full w-full grow cursor-none resize-none rounded-lg border-0 bg-transparent p-4 focus:ring-0",
               "min-h-[100px] outline-none",
             )}
             rows={1}

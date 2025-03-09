@@ -48,6 +48,8 @@ export async function POST(req: Request) {
         "1. Match the vibe of the communication based on the provided context.",
         "2. For corporate communication, use the recipient's name in the completion. If the context doesn't mention a name, use a generic salutation like 'Hi Team' or 'Hi [Recipient]'.",
         "3. Keep the language optimistic even when it's someone else's fault. We need to be positive and professional. Keep it always concise by using simpler vocabulary and shorter sentences. Use straight forward language. Avoid being coming across as very distant or cold. Make sure to sound more direct and human.",
+        "4. Don't use any emojis.",
+        "5. Don't output anything if the end is reached, for example of a letter, email, etc.",
       ]
         .filter(Boolean)
         .join("\n\n");
