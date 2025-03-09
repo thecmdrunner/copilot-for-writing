@@ -4,6 +4,7 @@ import { type CompletionResponse } from "@/app/api/completion/route";
 import { useDebounceCallback } from "@/hooks/use-debounce";
 import { cn } from "@/lib/utils";
 import { useMutation } from "@tanstack/react-query";
+import { LucideBookOpenText, LucideTextCursor } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 export function AutoCompleteEditor() {
@@ -78,6 +79,13 @@ export function AutoCompleteEditor() {
       if (lines.length === 0) return false;
 
       const lastLine = lines[lines.length - 1] ?? "";
+
+      // Special case: if the last line is empty (user just pressed Enter)
+      // and we have context, we should show a suggestion
+      if (lastLine.trim() === "" && context.trim()) {
+        return true;
+      }
+
       const lastLineLength = lastLine.length;
 
       // Calculate position in the last line
@@ -207,10 +215,50 @@ export function AutoCompleteEditor() {
       const oldValue = input;
       setInput(newValue);
 
-      // Reset suggestion if user goes to a new line
-      if (newValue.split("\n").length > oldValue.split("\n").length) {
-        setAiSuggestion("");
-        return;
+      // Check if user went to a new line
+      const oldLines = oldValue.split("\n");
+      const newLines = newValue.split("\n");
+
+      // If we have more lines than before, the user pressed Enter
+      if (newLines.length > oldLines.length) {
+        console.log("NEW LINE DETECTED - CHECKING FOR CONTENT");
+
+        // Get the current cursor position
+        const cursorPosition = e.target.selectionStart;
+
+        // Check if there's no content after the cursor position
+        if (cursorPosition === newValue.length) {
+          console.log("NO CONTENT AFTER CURSOR - GENERATING SUGGESTION");
+
+          // Make a direct API call to get a suggestion for the new line
+          fetch("/api/completion", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              prompt: newValue,
+              context: context.trim(),
+            }),
+          })
+            .then((response) => {
+              if (!response.ok) {
+                return response.text().then((text) => {
+                  throw new Error(`API error: ${text}`);
+                });
+              }
+              return response.json();
+            })
+            .then((data) => {
+              console.log("NEW LINE SUGGESTION RESULT", data);
+              if (data.text) {
+                setAiSuggestion(data.text);
+              }
+            })
+            .catch((error) => {
+              console.error("Error fetching new line suggestion:", error);
+            });
+
+          return; // Skip the regular suggestion flow
+        }
       }
 
       // Handle when user types characters
@@ -255,6 +303,7 @@ export function AutoCompleteEditor() {
       input,
       aiSuggestion,
       shouldShowSuggestion,
+      context,
     ],
   );
 
@@ -414,34 +463,15 @@ export function AutoCompleteEditor() {
   }, [input, context, isComposing, aiSuggestion]);
 
   return (
-    <div className="relative mx-auto w-full max-w-2xl">
-      {/* Context input */}
-      <div className="mb-4">
-        <label
-          htmlFor="context"
-          className="mb-1 block text-sm font-medium text-gray-700"
-        >
-          Writing Context (optional)
-        </label>
-        <div className="relative rounded-lg bg-gray-100/50">
-          <textarea
-            ref={contextRef}
-            id="context"
-            value={context}
-            onChange={handleContextChange}
-            placeholder="Describe your intent, e.g., 'I'm writing an email to a client about a project update...'"
-            className={cn(
-              "w-full resize-none rounded-lg border-0 bg-transparent p-3 focus:ring-0",
-              "min-h-[60px] text-sm outline-none",
-            )}
-            rows={2}
-          />
-        </div>
-      </div>
-
+    <div className="relative mx-auto flex h-[500px] w-full max-w-6xl gap-6">
       {/* Main editor */}
-      <div className="relative rounded-lg bg-gray-100/50">
-        <div className="relative">
+      <div className="relative h-full w-8/12 rounded-lg">
+        <p className="text-muted-foreground mb-4 flex items-center gap-2">
+          <LucideTextCursor className="h-4 w-4" /> Start typing and let AI help
+          you complete your thoughts.
+        </p>
+
+        <div className="relative h-full bg-neutral-100">
           {/* Input textarea with suggestion overlay */}
           <textarea
             ref={inputRef}
@@ -457,7 +487,7 @@ export function AutoCompleteEditor() {
             onFocus={handleInputFocus}
             placeholder="Start typing..."
             className={cn(
-              "w-full resize-none rounded-lg border-0 bg-transparent p-4 focus:ring-0",
+              "h-full min-h-full w-full grow resize-none rounded-lg border-0 bg-transparent p-4 focus:ring-0",
               "min-h-[100px] outline-none",
             )}
             rows={1}
@@ -475,10 +505,31 @@ export function AutoCompleteEditor() {
             </div>
           )}
         </div>
+        <p className="text-muted-foreground mt-2 text-xs">
+          Press Tab to accept the suggestion
+        </p>
       </div>
-      <p className="text-muted-foreground mt-2 text-xs">
-        Press Tab to accept the suggestion
-      </p>
+
+      {/* Context input */}
+      <div className="mb-4 w-4/12">
+        <p className="text-muted-foreground mb-4 flex items-center gap-2">
+          <LucideBookOpenText className="h-4 w-4" /> Context
+        </p>
+        <div className="relative bg-neutral-100">
+          <textarea
+            ref={contextRef}
+            id="context"
+            value={context}
+            onChange={handleContextChange}
+            placeholder="Describe your intent, e.g., 'I'm writing an email to a client about a project update...'"
+            className={cn(
+              "w-full resize-none rounded-lg border-0 bg-transparent p-3 focus:ring-0",
+              "h-max min-h-[150px] text-sm outline-none",
+            )}
+            rows={2}
+          />
+        </div>
+      </div>
     </div>
   );
 }

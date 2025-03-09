@@ -8,7 +8,7 @@ const instrumentSerif = Instrument_Serif({
 export default async function Home() {
   return (
     <main className="min-h-screen py-24">
-      <div className="mx-auto flex w-full max-w-2xl flex-col gap-y-6 rounded-xl p-5">
+      <div className="mx-auto flex w-full max-w-4xl flex-col gap-y-6 rounded-xl p-5">
         <div
           className={`flex w-max items-end gap-3 font-bold ${instrumentSerif.className} overflow-visible`}
         >
@@ -22,11 +22,6 @@ export default async function Home() {
             Composer
           </p>
         </div>
-
-        <p className="text-muted-foreground mx-auto mt-4">
-          Start typing and let AI help you complete your thoughts. Press Tab to
-          accept suggestions.
-        </p>
 
         <AutoCompleteEditor />
       </div>
