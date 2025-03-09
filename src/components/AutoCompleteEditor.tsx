@@ -4,9 +4,11 @@ import { type CompletionResponse } from "@/app/api/completion/route";
 import { useDebounceCallback } from "@/hooks/use-debounce";
 import { cn } from "@/lib/utils";
 import { useMutation } from "@tanstack/react-query";
-import { LucideBookOpenText, LucideTextCursor } from "lucide-react";
+import { LucideBookOpenText, LucideCopy, LucideTextCursor } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import toast from "react-hot-toast";
 import { Pointer } from "./magicui/pointer";
+import { Button } from "./ui/button";
 
 export function AutoCompleteEditor() {
   const [input, setInput] = useState("");
@@ -505,9 +507,31 @@ export function AutoCompleteEditor() {
             </div>
           )}
         </div>
-        <p className="text-muted-foreground mt-2 text-xs">
-          Press Tab to accept the suggestion
-        </p>
+
+        <div className="my-2 flex items-center justify-between">
+          <p className="text-muted-foreground mt-2 text-xs">
+            Press{"  "}
+            <kbd className="rounded-md border border-b-[3px] border-neutral-400 bg-neutral-200 px-1 py-0.5 shadow-[0_1px_0_1px_rgba(0,0,0,0.2)]">
+              Tab
+            </kbd>
+            {"  "}
+            to accept the suggestion
+          </p>
+
+          <Button
+            size={"sm"}
+            variant={"secondary"}
+            className="rounded-lg py-0"
+            type="button"
+            onClick={() => {
+              void navigator.clipboard.writeText(input).then(() => {
+                toast.success("Copied to clipboard");
+              });
+            }}
+          >
+            <LucideCopy className="h-4 w-4" /> Copy
+          </Button>
+        </div>
       </div>
 
       {/* Context input */}
