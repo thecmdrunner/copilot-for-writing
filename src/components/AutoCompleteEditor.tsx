@@ -5,17 +5,18 @@ import { useDebounceCallback } from "@/hooks/use-debounce";
 import { cn } from "@/lib/utils";
 import { useMutation } from "@tanstack/react-query";
 import { LucideBookOpenText, LucideCopy, LucideTextCursor } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { RefObject, useCallback, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { Pointer } from "./magicui/pointer";
 import { Button } from "./ui/button";
 
 export function AutoCompleteEditor() {
   const [input, setInput] = useState("");
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const textToCopyRef = useRef("");
   const [aiSuggestion, setAiSuggestion] = useState("");
   const [isComposing, setIsComposing] = useState(false);
   const [context, setContext] = useState("");
-  const inputRef = useRef<HTMLTextAreaElement>(null);
   const suggestionRef = useRef<HTMLDivElement>(null);
   const contextRef = useRef<HTMLTextAreaElement>(null);
 
@@ -215,6 +216,7 @@ export function AutoCompleteEditor() {
       const newValue = e.target.value;
       const oldValue = input;
       setInput(newValue);
+      textToCopyRef.current = newValue;
 
       // Check if user went to a new line
       const oldLines = oldValue.split("\n");
@@ -312,7 +314,12 @@ export function AutoCompleteEditor() {
       // Handle Tab key to accept suggestion
       if (e.key === "Tab" && aiSuggestion) {
         e.preventDefault();
-        setInput((prev) => prev + aiSuggestion);
+        setInput((prev) => {
+          const newText = prev + aiSuggestion;
+          textToCopyRef.current = newText;
+
+          return newText;
+        });
         setAiSuggestion("");
 
         // Set cursor at the end of the input
@@ -463,6 +470,7 @@ export function AutoCompleteEditor() {
 
   return (
     <div className="relative mx-auto flex h-[500px] w-full max-w-6xl gap-6">
+      <CopyListener textToCopyRef={textToCopyRef} />
       {/* Main editor */}
       <div className="relative h-full w-8/12 rounded-lg">
         <p className="text-muted-foreground mb-4 flex items-center gap-2">
@@ -525,11 +533,14 @@ export function AutoCompleteEditor() {
             type="button"
             onClick={() => {
               void navigator.clipboard.writeText(input).then(() => {
-                toast.success("Copied to clipboard");
+                toast.success("Copied to clipboard", {
+                  id: "copied-toast",
+                });
               });
             }}
           >
-            <LucideCopy className="h-4 w-4" /> Copy
+            <LucideCopy className="h-3 w-3" /> Copy{" "}
+            {navigator.platform.includes("Mac") ? "(⌘ C)" : "(Ctrl + C)"}
           </Button>
         </div>
       </div>
@@ -557,3 +568,37 @@ export function AutoCompleteEditor() {
     </div>
   );
 }
+
+const CopyListener = ({
+  textToCopyRef,
+}: {
+  textToCopyRef: RefObject<string>;
+}) => {
+  // Add keyboard shortcut listener for copy
+  useEffect(() => {
+    const abortController = new AbortController();
+
+    window.addEventListener(
+      "keydown",
+      (e: KeyboardEvent) => {
+        if ((e.metaKey || e.ctrlKey) && e.key === "c") {
+          const selectedText = textToCopyRef.current?.trim() ?? "";
+          if (selectedText?.length > 0) {
+            void navigator.clipboard.writeText(selectedText).then(() => {
+              toast.success("Copied to clipboard", {
+                id: "copied-toast",
+              });
+            });
+          }
+        }
+      },
+      {
+        signal: abortController.signal,
+      },
+    );
+
+    return () => abortController.abort();
+  }, []);
+
+  return null;
+};
