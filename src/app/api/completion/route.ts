@@ -22,15 +22,24 @@ export async function POST(req: Request) {
   }
 
   const { prompt, context } = result.data;
+  const now = new Date();
 
   try {
     // Create a system prompt that includes the context if provided
-    let systemPrompt =
-      "You are a helpful writing assistant. Complete the user's sentence naturally and concisely. IMPORTANT: Only provide the completion text that should come AFTER what the user has already typed. Do NOT repeat any part of what the user has already written. Keep the completion short and relevant. Maintain the same case format as the user's last word.";
+    const systemPrompt = [
+      "You are a helpful writing assistant. Complete the user's sentence naturally and concisely. IMPORTANT: Only provide the completion text that should come AFTER what the user has already typed. Do NOT repeat any part of what the user has already written. Keep the completion short and relevant. Maintain the same case format as the user's last word.",
 
-    if (context) {
-      systemPrompt += `\n\nContext for this writing: ${context}\n\nUse this context to make your completions more relevant and specific. Pay special attention to names, dates, and specific details mentioned in the context.`;
-    }
+      `Today is ${now.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })}.`,
+
+      context &&
+        `Context for this writing: ${context}\n\nUse this context to make your completions more relevant and specific. Pay special attention to names, dates, and specific details mentioned in the context.`,
+    ]
+      .filter(Boolean)
+      .join("\n\n");
 
     const { text } = await generateText({
       model: openai("gpt-4o-mini"),
