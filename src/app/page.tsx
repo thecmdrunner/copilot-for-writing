@@ -20,7 +20,10 @@ export default async function Home() {
             className="h-20 w-20"
           />
           <p className="mb-1 flex items-center gap-2 overflow-visible bg-gradient-to-r from-blue-500 via-cyan-500 to-indigo-500 bg-clip-text text-5xl font-black text-transparent">
-            Composer -
+            <span className="underline decoration-blue-200 decoration-wavy decoration-2 underline-offset-4 hover:decoration-blue-500">
+              Composer
+            </span>{" "}
+            -
             <span className="text-muted-foreground text-lg">
               like Cursor, for writing
             </span>
@@ -30,7 +33,7 @@ export default async function Home() {
         <AutoCompleteEditor />
       </div>
 
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2">
+      <div className="absolute bottom-8 right-10 font-mono">
         <Credits />
       </div>
     </main>

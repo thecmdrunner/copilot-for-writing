@@ -5,9 +5,13 @@ import { GeistSans } from "geist/font/sans";
 import { type Metadata } from "next";
 import { Toaster } from "react-hot-toast";
 export const metadata: Metadata = {
-  title: "Composer",
+  title: "Composer AI - Like Cursor, for Writing",
   description: "A writing assistant that helps you write better",
-  icons: [{ rel: "icon", url: "/favicon.ico" }],
+  icons: [
+    { rel: "icon", url: "/icons8-quill-color-pixels-96.png", sizes: "96x96" },
+    { rel: "icon", url: "/icons8-quill-color-pixels-32.png", sizes: "32x32" },
+    { rel: "icon", url: "/icons8-quill-color-pixels-16.png", sizes: "16x16" },
+  ],
 };
 
 export default function RootLayout({

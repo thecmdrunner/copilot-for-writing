@@ -485,6 +485,7 @@ export function AutoCompleteEditor() {
           {/* Input textarea with suggestion overlay */}
           <textarea
             ref={inputRef}
+            autoFocus
             value={
               context.trim().length > 0 && aiSuggestion && input.length === 0
                 ? " "
@@ -498,9 +499,9 @@ export function AutoCompleteEditor() {
             placeholder="Start typing..."
             className={cn(
               "h-full min-h-full w-full grow cursor-none resize-none rounded-lg border-0 bg-transparent p-4 focus:ring-0",
-              "min-h-[100px] outline-none",
+              "min-h-[500px] outline-none",
             )}
-            rows={1}
+            rows={2}
           />
 
           {/* Suggestion overlay */}
