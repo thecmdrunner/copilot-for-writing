@@ -1,4 +1,4 @@
-import { openai } from "@ai-sdk/openai";
+import { groq } from "@ai-sdk/groq";
 import { generateText } from "ai";
 import { z } from "zod";
 
@@ -83,7 +83,8 @@ export async function POST(req: Request) {
       });
 
       const { text } = await generateText({
-        model: openai("gpt-4o-mini"),
+        // model: groq("llama-3.2-1b-preview"),
+        model: groq("llama-3.3-70b-versatile"),
         system:
           systemPrompt +
           (specialInstructions ? `\n\n${specialInstructions}` : ""),
