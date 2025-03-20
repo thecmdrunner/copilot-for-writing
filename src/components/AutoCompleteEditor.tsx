@@ -17,6 +17,7 @@ export function AutoCompleteEditor() {
   const [aiSuggestion, setAiSuggestion] = useState("");
   const [isComposing, setIsComposing] = useState(false);
   const [context, setContext] = useState("");
+  const [tabPressed, setTabPressed] = useState(false);
   const suggestionRef = useRef<HTMLDivElement>(null);
   const contextRef = useRef<HTMLTextAreaElement>(null);
 
@@ -314,6 +315,13 @@ export function AutoCompleteEditor() {
       // Handle Tab key to accept suggestion
       if (e.key === "Tab" && aiSuggestion) {
         e.preventDefault();
+        setTabPressed(true);
+
+        // Reset the animation after a short delay
+        setTimeout(() => {
+          setTabPressed(false);
+        }, 150);
+
         setInput((prev) => {
           const newText = prev + aiSuggestion;
           textToCopyRef.current = newText;
@@ -520,7 +528,13 @@ export function AutoCompleteEditor() {
         <div className="my-2 flex items-center justify-between">
           <p className="mt-2 text-xs text-muted-foreground">
             Press{"  "}
-            <kbd className="rounded-md border border-b-[3px] border-neutral-400 bg-neutral-200 px-1 py-0.5 shadow-[0_1px_0_1px_rgba(0,0,0,0.2)]">
+            <kbd
+              className={cn(
+                "rounded-md border border-b-[3px] border-neutral-400 bg-neutral-200 px-1 py-0.5 shadow-[0_1px_0_1px_rgba(0,0,0,0.2)] transition-all duration-150",
+                tabPressed &&
+                  "translate-y-[2px] border-b-[1px] border-purple-300 bg-purple-100 text-purple-600 shadow-none ring-2 ring-blue-200/50",
+              )}
+            >
               Tab
             </kbd>
             {"  "}
