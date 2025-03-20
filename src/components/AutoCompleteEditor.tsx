@@ -473,7 +473,7 @@ export function AutoCompleteEditor() {
       <CopyListener textToCopyRef={textToCopyRef} />
       {/* Main editor */}
       <div className="relative h-full w-8/12 rounded-lg">
-        <p className="text-muted-foreground mb-4 flex items-center gap-2">
+        <p className="mb-4 flex items-center gap-2 text-muted-foreground">
           <LucideTextCursor className="h-4 w-4" /> Start typing and let AI help
           you complete your thoughts.
         </p>
@@ -518,7 +518,7 @@ export function AutoCompleteEditor() {
         </div>
 
         <div className="my-2 flex items-center justify-between">
-          <p className="text-muted-foreground mt-2 text-xs">
+          <p className="mt-2 text-xs text-muted-foreground">
             Press{"  "}
             <kbd className="rounded-md border border-b-[3px] border-neutral-400 bg-neutral-200 px-1 py-0.5 shadow-[0_1px_0_1px_rgba(0,0,0,0.2)]">
               Tab
@@ -548,10 +548,10 @@ export function AutoCompleteEditor() {
 
       {/* Context input */}
       <div className="h-full w-4/12">
-        <p className="text-muted-foreground mb-4 flex items-center gap-2">
+        <p className="mb-4 flex items-center gap-2 text-muted-foreground">
           <LucideBookOpenText className="h-4 w-4" /> Context
         </p>
-        <div className="relative h-full border border-neutral-100">
+        <div className="relative h-full overflow-auto border border-neutral-100">
           <textarea
             ref={contextRef}
             id="context"
@@ -560,7 +560,7 @@ export function AutoCompleteEditor() {
             placeholder="Describe your intent, e.g., 'I'm writing an email to a client about a project update...'"
             className={cn(
               "w-full resize-none rounded-lg border-0 bg-transparent p-3 focus:ring-0",
-              "h-max min-h-[150px] text-sm outline-none",
+              "h-max max-h-full min-h-[150px] text-sm outline-none",
             )}
             rows={2}
           />
