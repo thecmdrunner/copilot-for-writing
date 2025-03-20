@@ -5,7 +5,7 @@ import { GeistSans } from "geist/font/sans";
 import { type Metadata } from "next";
 import { Toaster } from "react-hot-toast";
 export const metadata: Metadata = {
-  title: "Composer AIIII - Like Cursor, for Writing",
+  title: "Composer AI - Like Cursor, for Writing",
   description: "A writing assistant that helps you write better",
   icons: [
     { rel: "icon", url: "/icons8-quill-color-pixels-96.png", sizes: "96x96" },
@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     { rel: "icon", url: "/icons8-quill-color-pixels-16.png", sizes: "16x16" },
   ],
   openGraph: {
-    title: "Composer AIIIII - Like Cursor, for Writing",
+    title: "Composer AI - Like Cursor, for Writing",
     description: "A writing assistant that helps you write better",
     url: "https://copilot-for-writing.vercel.app",
     siteName: "Composer AI",
