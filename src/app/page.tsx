@@ -13,7 +13,6 @@ export default async function Home() {
         <div
           className={`flex w-max items-end gap-3 font-bold ${instrumentSerif.className} overflow-visible`}
         >
-          {/* <LucideSparkles className="h-8 w-8" /> */}
           <img
             src="https://img.icons8.com/?size=128&id=R59UyFhVgdnm&format=png"
             alt="Composer"
@@ -24,7 +23,7 @@ export default async function Home() {
               Composer
             </span>{" "}
             -
-            <span className="text-muted-foreground text-lg">
+            <span className="text-lg text-muted-foreground">
               like Cursor, for writing
             </span>
           </p>
