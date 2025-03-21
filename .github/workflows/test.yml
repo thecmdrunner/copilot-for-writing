@@ -21,11 +21,10 @@ jobs:
 
       - name: Check env vars
         run: |
-          # log github commit hash 
           echo "GITHUB_SHA: ${{ github.sha }}"
           echo "GITHUB_REF: ${{ github.ref }}"
           echo "GITHUB_REF_NAME: ${{ github.ref_name }}"
-          echo "GITHUB_REF_SLUG: ${{ github.ref_slug }}"     `
+          echo "GITHUB_REF_SLUG: ${{ github.ref_slug }}"
           echo "GITHUB_REF_TYPE: ${{ github.ref_type }}"
           echo "GITHUB_REF_NAME: ${{ github.ref_name }}"
 
