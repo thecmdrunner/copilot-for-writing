@@ -13,7 +13,7 @@ on:
   workflow_dispatch: # Allows manual triggering of the workflow.
 
 jobs:
-  deploy_backend_gcf:
+  test_gh_fetch_workflow:
     runs-on: ubuntu-latest
 
     steps:
