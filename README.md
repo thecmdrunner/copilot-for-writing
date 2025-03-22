@@ -1,3 +1,8 @@
+# Future ideas
+
+- [ ] One word only autocomplete: https://x.com/aidenybai/status/1903499918368457123
+- [ ] Let it autocomplete in between sentences as well (more like how cursor works)
+
 # Create T3 App
 
 This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
