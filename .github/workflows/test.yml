@@ -25,13 +25,13 @@ jobs:
           version: 10
           run_install: false
 
-      - name: Check env vars
-        run: |
-          echo "GITHUB_SHA=\"${{ github.sha }}\"" >> .env.prod
-          echo "GITHUB_REF=\"${{ github.ref }}\"" >> .env.prod
-          echo "GITHUB_REF_NAME=\"${{ github.ref_name }}\"" >> .env.prod
-          echo "GITHUB_REF_TYPE=\"${{ github.ref_type }}\"" >> .env.prod
-          echo "GITHUB_REF_NAME=\"${{ github.ref_name }}\"" >> .env.prod
+      # - name: Check env vars
+      #   run: |
+      #     # echo "GITHUB_SHA=\"${{ github.sha }}\"" >> .env.prod
+      #     # echo "GITHUB_REF=\"${{ github.ref }}\"" >> .env.prod
+      #     # echo "GITHUB_REF_NAME=\"${{ github.ref_name }}\"" >> .env.prod
+      #     # echo "GITHUB_REF_TYPE=\"${{ github.ref_type }}\"" >> .env.prod
+      #     # echo "GITHUB_REF_NAME=\"${{ github.ref_name }}\"" >> .env.prod
 
       - name: Run deploy script
         run: |
