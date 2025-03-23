@@ -36,6 +36,7 @@ jobs:
       - name: Run deploy script
         run: |
           echo "Running deploy script"
+          pnpm install
           pnpm run run:deploy
 
       - name: Send Debug Log to API
