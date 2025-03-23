@@ -1,4 +1,3 @@
-import { readFileSync } from "fs";
 // config({ path: ".env.prod" });
 
 console.log(`GITHUB ENVS`, {
@@ -9,5 +8,5 @@ console.log(`GITHUB ENVS`, {
   ...process.env,
 });
 
-const envFile = readFileSync(".env.prod", "utf-8");
-console.log(envFile);
+// const envFile = readFileSync(".env.prod", "utf-8");
+// console.log(envFile);
