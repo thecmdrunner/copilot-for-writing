@@ -2,6 +2,7 @@
 
 - [ ] One word only autocomplete: https://x.com/aidenybai/status/1903499918368457123
 - [ ] Let it autocomplete in between sentences as well (more like how cursor works)
+- [ ] Use these smarter prompts: https://x.com/heyrobinai/status/1925902555151729116
 
 # Create T3 App
 
